@@ -49,7 +49,7 @@ def main():
                 screenshot_capturer = ScreenshotCapturer(driver, config)
 
                 # interaction_manager = InteractionManager(driver, config)
-                interaction_manager = SimpleInteractionManager(driver, config)
+                # interaction_manager = SimpleInteractionManager(driver, config)
 
                 screenshot_annotator = ScreenshotAnnotator(config)
  
@@ -64,32 +64,32 @@ def main():
                 detected_ads = ad_detector.detect_ads()
                 logger.info(f"Обнаружено {len(detected_ads)} реклам на {url}")
 
-                # full_page_screenshot = screenshot_capturer.capture_full_page()
-                # annotated_screenshot = None
+                full_page_screenshot = screenshot_capturer.capture_full_page()
+                annotated_screenshot = None
 
-                # if detected_ads and full_page_screenshot:
-                #     annotated_screenshot = screenshot_annotator.annotate_ads_on_screenshot(
-                #         full_page_screenshot, detected_ads
-                #     )
+                if detected_ads and full_page_screenshot:
+                    annotated_screenshot = screenshot_annotator.annotate_ads_on_screenshot(
+                        full_page_screenshot, detected_ads
+                    )
 
-                #     comparison_image = screenshot_annotator.create_comparison_image(
-                #         full_page_screenshot,
-                #         annotated_screenshot
-                #     )
+                    comparison_image = screenshot_annotator.create_comparison_image(
+                        full_page_screenshot,
+                        annotated_screenshot
+                    )
 
-                #     legend_builder.create_detailed_legend_image(detected_ads)
+                    legend_builder.create_detailed_legend_image(detected_ads)
 
-                #     stats = legend_builder.create_summary_statistics(detected_ads)
-                #     logger.info(f"Статистика обнаружения: {json.dumps(stats, indent=2)}")
+                    stats = legend_builder.create_summary_statistics(detected_ads)
+                    logger.info(f"Статистика обнаружения: {json.dumps(stats, indent=2)}")
 
-                #     screenshot_capturer.capture_ads_screenshots(detected_ads)
+                    screenshot_capturer.capture_ads_screenshots(detected_ads)
 
                 # interaction_results = []
                 # for ad in detected_ads:
                 #     interaction_result = interaction_manager.perform_complete_ad_interaction(ad, max_interactions=1)
                 #     interaction_results.append(interaction_result)
 
-                interaction_results = interaction_manager.test_multiple_ads(detected_ads, max_ads=2)
+                # interaction_results = interaction_manager.test_multiple_ads(detected_ads, max_ads=2)
 
                 scan_data = {
                     'url': url,
@@ -97,7 +97,7 @@ def main():
                     'scan_timestamp': time.time(),
                     'scan_duration': time.time() - scan_start_time,
                     'detected_ads': detected_ads,
-                    'interaction_results': interaction_results,
+                    # 'interaction_results': interaction_results,
 
                     'processed_urls': [url]
                 }
