@@ -1,15 +1,11 @@
 from config.settings import Settings
 from core.driver_manager import DriverManager
 from modules.parser.page_loader import PageLoader
-from modules.parser.html_analyzer import HTMLAnalyzer
 from modules.detection.ad_detector import AdDetector
-from modules.interaction.interaction_manager import InteractionManager
 from modules.screenshot.capturer import ScreenshotCapturer
 from modules.screenshot.annotator import ScreenshotAnnotator
 from modules.screenshot.legend_builder import LegendBuilder
 from modules.reporting.report_generator import ReportGenerator
-from modules.interaction.simple_interaction_manager import SimpleInteractionManager
-from modules.interaction.utm_analyzer import UTMAnalyzer
 from utils.logger import setup_logging
 import logging
 import time
@@ -48,9 +44,6 @@ def main():
 
                 screenshot_capturer = ScreenshotCapturer(driver, config)
 
-                # interaction_manager = InteractionManager(driver, config)
-                # interaction_manager = SimpleInteractionManager(driver, config)
-
                 screenshot_annotator = ScreenshotAnnotator(config)
  
                 legend_builder = LegendBuilder(config)
@@ -84,21 +77,12 @@ def main():
 
                     screenshot_capturer.capture_ads_screenshots(detected_ads)
 
-                # interaction_results = []
-                # for ad in detected_ads:
-                #     interaction_result = interaction_manager.perform_complete_ad_interaction(ad, max_interactions=1)
-                #     interaction_results.append(interaction_result)
-
-                # interaction_results = interaction_manager.test_multiple_ads(detected_ads, max_ads=2)
-
                 scan_data = {
                     'url': url,
                     'main_domain': url.split('//')[-1].split('/')[0],
                     'scan_timestamp': time.time(),
                     'scan_duration': time.time() - scan_start_time,
                     'detected_ads': detected_ads,
-                    # 'interaction_results': interaction_results,
-
                     'processed_urls': [url]
                 }
 
