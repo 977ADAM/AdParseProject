@@ -34,16 +34,13 @@ class ReportGenerator:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             report_base_name = f"ad_report_{timestamp}"
             
-            # Генерация отчетов в разных форматах
             report_paths = {}
             
-            # JSON отчет
             json_report_path = self.json_exporter.export_report(
                 report_data, f"{report_base_name}.json"
             )
             report_paths['json'] = json_report_path
             
-            # CSV отчет
             csv_report_path = self.csv_exporter.export_report(
                 report_data, f"{report_base_name}.csv"
             )
@@ -71,14 +68,19 @@ class ReportGenerator:
         try:
             report_data = {
                 'metadata': self._generate_metadata(scan_data.get('scan_duration')),
+
                 'scan_summary': self._generate_scan_summary(scan_data),
+
                 # 'url_analysis': scan_data.get('url_analysis', {}),
+
                 'ads_detection': self._process_ads_data(scan_data.get('detected_ads', [])),
-                'interaction_results': self._process_interaction_data(
-                    scan_data.get('interaction_results', [])
-                ),
+
+                'interaction_results': self._process_interaction_data(scan_data.get('interaction_results', [])),
+
                 'screenshots': scan_data.get('screenshots', {}),
+
                 'statistics': self.statistics_calculator.calculate_comprehensive_stats(scan_data),
+
                 'recommendations': self._generate_recommendations(scan_data)
             }
             
@@ -145,37 +147,23 @@ class ReportGenerator:
             return {'total_interactions': 0}
         
         processed_interactions = []
-        successful_interactions = 0
-        total_utm_found = 0
         
         for interaction in interaction_data:
             ad_data = interaction.get('ad_data', {})
-            summary = interaction.get('summary', {})
+            interactions = interaction.get('interaction', {})
             
             processed_interaction = {
                 'ad_id': ad_data.get('id', 'N/A'),
                 'ad_network': ad_data.get('network', 'unknown'),
-                'successful_attempts': summary.get('successful_attempts', 0),
-                'total_attempts': summary.get('total_attempts', 0),
-                'success_rate': summary.get('success_rate', 0),
-                'redirect_types': summary.get('redirect_types', []),
-                'utm_found': summary.get('utm_found', False),
-                'security_issues': summary.get('security_issues', [])
+                'ad_page_link': interactions.get('redirect_analysis').get('current_url'),
+                'url_analysis': interactions.get('redirect_analysis').get('url_analysis')
             }
             
             processed_interactions.append(processed_interaction)
-            
-            if summary.get('successful_attempts', 0) > 0:
-                successful_interactions += 1
-            
-            if summary.get('utm_found', False):
-                total_utm_found += 1
+
         
         return {
             'total_interactions': len(processed_interactions),
-            'successful_interactions': successful_interactions,
-            'interaction_success_rate': (successful_interactions / len(processed_interactions) * 100) if processed_interactions else 0,
-            'total_utm_found': total_utm_found,
             'interactions': processed_interactions
         }
     

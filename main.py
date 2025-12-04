@@ -6,6 +6,7 @@ from modules.screenshot.capturer import ScreenshotCapturer
 from modules.screenshot.annotator import ScreenshotAnnotator
 from modules.screenshot.legend_builder import LegendBuilder
 from modules.reporting.report_generator import ReportGenerator
+from modules.interaction.interaction_manager_version1 import InteractionManager
 from utils.logger import setup_logging
 import logging
 import time
@@ -44,6 +45,8 @@ def main():
 
                 screenshot_capturer = ScreenshotCapturer(driver, config)
 
+                interaction_manager = InteractionManager(driver, config)
+
                 screenshot_annotator = ScreenshotAnnotator(config)
  
                 legend_builder = LegendBuilder(config)
@@ -77,12 +80,15 @@ def main():
 
                     screenshot_capturer.capture_ads_screenshots(detected_ads)
 
+                interaction_results = interaction_manager.perform_complete_ad_interaction(detected_ads)
+
                 scan_data = {
                     'url': url,
                     'main_domain': url.split('//')[-1].split('/')[0],
                     'scan_timestamp': time.time(),
                     'scan_duration': time.time() - scan_start_time,
                     'detected_ads': detected_ads,
+                    'interaction_results': interaction_results,
                     'processed_urls': [url]
                 }
 
@@ -119,7 +125,7 @@ def main():
                 json.dump(final_summary, f, indent=2, ensure_ascii=False)
         
         else:
-            logger.warning("No scan data collected - skipping report generation")
+            logger.warning("Данные сканирования не собираются — создание отчета пропускается")
 
     except Exception as e:
         logger.error(f"Ошибка приложения: {str(e)}")

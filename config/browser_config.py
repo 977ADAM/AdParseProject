@@ -1,5 +1,6 @@
 from selenium.webdriver.chrome.options import Options
 from .settings import Settings
+from fake_useragent import UserAgent
 
 class BrowserConfig:
     @staticmethod
@@ -13,6 +14,7 @@ class BrowserConfig:
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
         options.add_argument(f"--window-size={config.WIDTH_WINDOW},{config.HEIGHT_WINDOW}")
+        options.add_argument(f"user-agent={UserAgent().random}")
         options.add_argument("--disable-features=VizDisplayCompositor")
         options.add_argument("--disable-background-timer-throttling")
         options.add_argument("--disable-backgrounding-occluded-windows")
