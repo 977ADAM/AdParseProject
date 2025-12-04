@@ -44,6 +44,13 @@ class DriverManager:
                 self.logger.info("Chrome WebDriver успешно закрыт")
             except Exception as e:
                 self.logger.error(f"Ошибка закрытия драйвера: {str(e)}")
+
+    def restart_driver(self):
+        """Перезапуск драйвера (полезно при утечках памяти)"""
+        self.logger.info("Restarting Chrome WebDriver...")
+        self.quit_driver()
+        time.sleep(2)
+        return self.create_driver()
     
     def __enter__(self):
         return self.create_driver()

@@ -54,7 +54,7 @@ def main():
                 if not page_loader.load_page(url):
                     logger.error(f"Не удалось загрузить страницу.: {url}")
                     continue
-
+                logger.info(driver.title)
                 page_loader.scroll_page()
 
                 detected_ads = ad_detector.detect_ads()
