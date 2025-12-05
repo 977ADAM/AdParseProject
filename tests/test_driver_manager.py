@@ -16,8 +16,8 @@ class TestDriverManager:
     def config(self):
         """Фикстура с конфигурацией для тестов"""
         config = Settings()
-        config.HEADLESS = True  # Всегда в headless режиме для тестов
-        config.PAGE_LOAD_TIMEOUT = 15  # Уменьшаем таймаут для тестов
+        config.HEADLESS = True
+        config.PAGE_LOAD_TIMEOUT = 15
         return config
     
     @pytest.mark.selenium

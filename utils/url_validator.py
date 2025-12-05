@@ -15,26 +15,28 @@ class URLValidator:
             return False
     
     @staticmethod
-    def normalize_urls(urls: List[str]) -> List[str]:
-        valid_urls = []
-        for url in urls:
-            if URLValidator.is_valid_url(url):
-                if not url.startswith(('http://', 'https://')):
-                    url = 'https://' + url
-                valid_urls.append(url)
-            else:
-                URLValidator.logger.warning(f"Skipping invalid URL: {url}")
-        
-        return valid_urls
+    def normalize_urls(url):
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+        return url
     
     @staticmethod
-    def extract_domain(url: str) -> Optional[str]:
+    def extract_domain(url, compare_url=None):
         try:
             parsed = urlparse(url)
-            domain = parsed.netloc
-            if domain.startswith('www.'):
-                domain = domain[4:]
-            return domain
+            domain = parsed.hostname
+            if ':' in domain:
+                domain = domain.split(':')[0]
+
+            if compare_url:
+                compare_parsed = urlparse(compare_url)
+                compare_domain = compare_parsed.hostname
+                if ':' in compare_domain:
+                    compare_domain = compare_domain.split(':')[0]
+                return domain == compare_domain
+            else:
+                return domain
+            
         except Exception as e:
             URLValidator.logger.warning(f"Ошибка извлечения домена из {url}: {e}")
             return None
