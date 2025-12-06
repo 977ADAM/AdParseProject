@@ -15,7 +15,7 @@ class URLValidator:
             return False
     
     @staticmethod
-    def normalize_urls(url):
+    def normalize_url(url):
         if not url.startswith(('http://', 'https://')):
             url = 'https://' + url
         return url
