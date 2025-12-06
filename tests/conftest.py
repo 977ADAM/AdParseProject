@@ -17,6 +17,7 @@ def mock_driver():
     """Фикстура для мока Selenium WebDriver"""
     driver = MagicMock()
     driver.get = MagicMock()
+    driver.execute_script = MagicMock()
     return driver
 
 
@@ -26,5 +27,8 @@ def mock_logger():
     with patch('logging.getLogger') as mock_get_logger:
         logger = MagicMock()
         logger.info = MagicMock()
+        logger.warning = MagicMock()
+        logger.error = MagicMock()
+        logger.debug = MagicMock()
         mock_get_logger.return_value = logger
         yield logger

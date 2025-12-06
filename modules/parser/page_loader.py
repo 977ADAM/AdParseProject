@@ -103,11 +103,10 @@ class PageLoader:
             self.logger.error(f"Error getting page info: {str(e)}")
             return {}
     
-    def scroll_page(self, scroll_pause_time=0.4) -> bool:
+    def scroll_page(self, scroll_steps=3, scroll_pause_time=0.4) -> bool:
         """Прокрутка страницы для загрузки динамического контента"""
         try:            
             page_height = self.driver.execute_script("return document.body.scrollHeight")
-            scroll_steps = 15
             scroll_step = page_height / scroll_steps
 
             for i in range(scroll_steps):
@@ -125,7 +124,7 @@ class PageLoader:
             return True
             
         except Exception as e:
-            self.logger.error(f"Error scrolling page: {str(e)}")
+            self.logger.error(f"Error scrolling page: {e}")
             return False
     
     def take_screenshot(self, filename=None):

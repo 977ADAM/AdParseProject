@@ -55,7 +55,7 @@ def main():
                     logger.error(f"Не удалось загрузить страницу.: {url}")
                     continue
                 logger.info(driver.title)
-                page_loader.scroll_page()
+                page_loader.scroll_page(scroll_steps=15)
 
                 detected_ads = ad_detector.detect_ads()
                 logger.info(f"Обнаружено {len(detected_ads)} реклам на {url}")
