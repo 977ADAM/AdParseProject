@@ -12,9 +12,9 @@ from config.settings import Settings
 
 class PageLoader:
     """Класс для загрузки и управления веб-страницами с обработкой ошибок"""
-    def __init__(self, driver: WebDriver, config):
+    def __init__(self, driver: WebDriver, config: Settings):
         self.driver = driver
-        self.config = config or Settings()
+        self.config = config
         self.logger = logging.getLogger(__name__)
         self.validator = URLValidator()
         self.wait = WebDriverWait(driver, self.config.PAGE_LOAD_TIMEOUT)
