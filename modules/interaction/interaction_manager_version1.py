@@ -1,16 +1,18 @@
 import logging
 import time
 from urllib.parse import urlparse, parse_qs
+from config.settings import Settings
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 
 class InteractionManager:
     """Главный класс для управления всем процессом взаимодействия с рекламой"""
-    def __init__(self, driver, config):
+    def __init__(self, driver, config: Settings):
         self.driver = driver
         self.config = config
         self.logger = logging.getLogger(__name__)
-        self.wait = WebDriverWait(driver, 15)
+        self.wait = WebDriverWait(driver, config.PAGE_LOAD_TIMEOUT)
 
     def perform_complete_ad_interaction(self, ads):
         """Выполнение полного цикла взаимодействия с рекламным блоком"""
@@ -39,7 +41,6 @@ class InteractionManager:
                 results.append(result)
 
                 if result_interaction.get('interaction_result', {}).get('success'):
-                    original_window = result_interaction['interaction_result'].get('original_window')
                     if original_window:
                         self.restore_original_state(original_window)
 
@@ -135,19 +136,22 @@ class InteractionManager:
         """Безопасный клик по элементу с обработкой ошибок"""
         try:
             original_url = self.driver.current_url
-            original_windows = set(self.driver.window_handles)
+
+            original_windows = self.driver.window_handles
+            
             original_window = self.driver.current_window_handle
             
             click_methods = [
-                self._try_action_click,
-                self._try_action_click_with_offset,
-                self._try_simple_click,
-                self._try_javascript_click
+                ("ПРЯМОЙ КЛИК", self._try_action_click),
+                ("КЛИК СО СМЕЩЕНИЕМ", self._try_action_click_with_offset),
+                ("", self._try_simple_click),
+                ("", self._try_javascript_click)
             ]
             
             result = {
                 'success': False,
-                'method': None,
+                'is_clickable': False,
+                'click_method': None,
                 'error': None,
                 'original_url': original_url,
                 'original_windows': list(original_windows),
@@ -156,25 +160,24 @@ class InteractionManager:
 
             self.driver.execute_script("arguments[0].scrollIntoView({ block: 'center', inline: 'center' });", element)
 
-            for method in click_methods:
-                method_name = method.__name__
+            for method_name, method in click_methods:
                 self.logger.info(f"Пробуем метод клика: {method_name}")
                 
                 try:
                     method(element)
-                    
-                    time.sleep(6)
-                    
+                    self.wait.until(EC.new_window_is_opened(original_window))
+
+                    result['click_method'] = method_name
+                    result['is_clickable'] = True
                     result['success'] = True
-                    result['method'] = method_name
-                    
-                    current_windows = set(self.driver.window_handles)
-                    self.logger.info(current_windows)
-                    new_windows = current_windows - original_windows
+
+                    new_windows = [w for w in self.driver.window_handles if w not in original_windows][0]
+                    self.logger.info(new_windows)
+                    self.logger.info(result['is_clickable'])
                     
                     if new_windows:
                         result['new_window_opened'] = True
-                        result['new_windows'] = list(new_windows)
+                        result['new_windows'] = list(new_windows)                        
                         
                         new_window = next(iter(new_windows))
                         self.driver.switch_to.window(new_window)
@@ -213,7 +216,6 @@ class InteractionManager:
     def _try_action_click_with_offset(self, element, x = 20, y = -10):
         actions = ActionChains(self.driver)
         actions.move_to_element_with_offset(element, x, y).click().perform()
-        self.logger.info("Клик через ActionChains со смещением")
 
     def _analyze_redirect(self, original_url, original_windows):
         """Анализ редиректа после клика"""
@@ -255,7 +257,6 @@ class InteractionManager:
             for window in current_windows:
                 if window != original_window:
                     try:
-                        self.driver.switch_to.window(window)
                         self.driver.close()
                     except:
                         pass
