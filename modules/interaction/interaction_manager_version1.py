@@ -2,17 +2,18 @@ import logging
 import time
 from urllib.parse import urlparse, parse_qs
 from config.settings import Settings
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 
 class InteractionManager:
     """Главный класс для управления всем процессом взаимодействия с рекламой"""
-    def __init__(self, driver, config: Settings):
+    def __init__(self, driver: WebDriver, config: Settings):
         self.driver = driver
         self.config = config
         self.logger = logging.getLogger(__name__)
-        self.wait = WebDriverWait(driver, config.PAGE_LOAD_TIMEOUT)
+        self.wait = WebDriverWait(self.driver, config.PAGE_LOAD_TIMEOUT)
 
     def perform_complete_ad_interaction(self, ads):
         """Выполнение полного цикла взаимодействия с рекламным блоком"""
@@ -32,6 +33,8 @@ class InteractionManager:
                 self.logger.info(f"Клик по {i} элементу")
 
                 result_interaction = self._interaction_proces(element)
+                
+                self.restore_original_state(original_window)
 
                 result = {
                     'ad_data': ad,
@@ -39,10 +42,6 @@ class InteractionManager:
                 }
 
                 results.append(result)
-
-                if result_interaction.get('interaction_result', {}).get('success'):
-                    if original_window:
-                        self.restore_original_state(original_window)
 
             except Exception as e:
                 self.logger.error(f"Ошибка клика по элементу {i}: {str(e)}")
@@ -165,22 +164,21 @@ class InteractionManager:
                 
                 try:
                     method(element)
-                    self.wait.until(EC.new_window_is_opened(original_window))
+                    # self.wait.until(EC.new_window_is_opened(original_window))
+                    self.wait.until(EC.number_of_windows_to_be(2))
+                    new_windows = [window for window in self.driver.window_handles if window != original_window][0]
+                    self.driver.switch_to.window(new_windows)
 
                     result['click_method'] = method_name
                     result['is_clickable'] = True
                     result['success'] = True
 
-                    new_windows = [w for w in self.driver.window_handles if w not in original_windows][0]
                     self.logger.info(new_windows)
                     self.logger.info(result['is_clickable'])
                     
                     if new_windows:
                         result['new_window_opened'] = True
-                        result['new_windows'] = list(new_windows)                        
-                        
-                        new_window = next(iter(new_windows))
-                        self.driver.switch_to.window(new_window)
+                        result['new_windows'] = list(new_windows) 
                     else:
                         result['new_window_opened'] = False
                         continue
@@ -252,16 +250,7 @@ class InteractionManager:
     def restore_original_state(self, original_window):
         """Восстановление исходного состояния браузера"""
         try:
-            current_windows = set(self.driver.window_handles)
-            
-            for window in current_windows:
-                if window != original_window:
-                    try:
-                        self.driver.close()
-                    except:
-                        pass
-            
+            self.driver.close()
             self.driver.switch_to.window(original_window)
-            
         except Exception as e:
-            self.logger.warning(f"Error restoring original state: {str(e)}")
+            self.logger.warning(f"Ошибка восстановления исходного состояния: {e}")
