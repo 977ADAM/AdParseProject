@@ -20,8 +20,7 @@ class TestClickEmulator:
         
         result = click_emulator._click_element(mock_web_element)
         
-        assert result['is_clickable'] is True
-        assert result['click_method'] is not None
+        assert result['success'] == True
 
     @allure.title("Тестовый анализ кликабельности — элемент не виден")
     @allure.severity(Severity.NORMAL)

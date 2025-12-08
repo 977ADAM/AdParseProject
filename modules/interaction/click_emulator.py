@@ -51,7 +51,7 @@ class ClickEmulator:
             ]
 
             original_window = self.driver.current_window_handle
-            original_windows = set(self.driver.window_handles)
+            original_windows = self.driver.window_handles
             
             for method in click_methods:
                 method_name = method.__name__

@@ -62,6 +62,8 @@ class InteractionManager:
             if results['click_analysis']['is_clickable']:
                 click_result = self._click_element(element)
                 results['interaction_result'] = click_result
+                self.logger.info(click_result.get("is_clickable"))
+                self.logger.info(click_result.get("success"))
                 
                 if click_result.get('success'):
                     results['redirect_analysis'] = self._analyze_redirect(
@@ -142,9 +144,7 @@ class InteractionManager:
             
             click_methods = [
                 ("ПРЯМОЙ КЛИК", self._try_action_click),
-                ("КЛИК СО СМЕЩЕНИЕМ", self._try_action_click_with_offset),
-                ("", self._try_simple_click),
-                ("", self._try_javascript_click)
+                ("КЛИК СО СМЕЩЕНИЕМ", self._try_action_click_with_offset)
             ]
             
             result = {
@@ -161,59 +161,55 @@ class InteractionManager:
 
             for method_name, method in click_methods:
                 self.logger.info(f"Пробуем метод клика: {method_name}")
-                
                 try:
-                    method(element)
+                    click_result = method(element)
                     # self.wait.until(EC.new_window_is_opened(original_window))
                     self.wait.until(EC.number_of_windows_to_be(2))
                     new_windows = [window for window in self.driver.window_handles if window != original_window][0]
                     self.driver.switch_to.window(new_windows)
-
-                    result['click_method'] = method_name
-                    result['is_clickable'] = True
-                    result['success'] = True
-
-                    self.logger.info(new_windows)
-                    self.logger.info(result['is_clickable'])
                     
-                    if new_windows:
+                    if click_result['success']:
                         result['new_window_opened'] = True
                         result['new_windows'] = list(new_windows) 
+                        result['click_method'] = method_name
+                        result['is_clickable'] = True
+                        result['success'] = True
+                        break
                     else:
                         result['new_window_opened'] = False
-                        continue
-                    
-                    break
+                        
                     
                 except Exception as e:
+                    self.logger.warning(f"Предупреждение о клике {e}")
                     result['error'] = str(e)
                     continue
             
             return result
             
         except Exception as e:
+            self.logger.warning(f"Предупреждение о клике {e}")
             return {
                 'success': False,
                 'error': str(e),
                 'method': 'none'
             }
-
-    def _try_simple_click(self, element):
-        """Простой клик"""
-        element.click()
     
-    def _try_javascript_click(self, element):
-        """Клик через JavaScript"""
-        self.driver.execute_script("arguments[0].click();", element)
-
     def _try_action_click(self, element):
         """Клик через ActionChains"""
-        actions = ActionChains(self.driver)
-        actions.move_to_element(element).click().perform()
+        try:
+            actions = ActionChains(self.driver)
+            actions.move_to_element(element).click().perform()
+            return {'success': True, 'method': 'action_click'}
+        except Exception as e:
+            return {'success': False, 'method': f'action_click_error: {e}'}
 
     def _try_action_click_with_offset(self, element, x = 20, y = -10):
-        actions = ActionChains(self.driver)
-        actions.move_to_element_with_offset(element, x, y).click().perform()
+        try:
+            actions = ActionChains(self.driver)
+            actions.move_to_element_with_offset(element, x, y).click().perform()
+            return {'success': True, 'method': 'action_click_with_offset'}
+        except Exception as e:
+            return {'success': False, 'method': f'action_click_with_offset_error: {e}'}
 
     def _analyze_redirect(self, original_url, original_windows):
         """Анализ редиректа после клика"""
