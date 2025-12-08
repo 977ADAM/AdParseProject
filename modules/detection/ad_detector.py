@@ -1,4 +1,5 @@
 import logging
+from config.settings import Settings
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.common.exceptions import StaleElementReferenceException
@@ -9,7 +10,7 @@ from modules.detection.pattern_matcher import PatternMatcher
 
 class AdDetector:
     """Основной класс для обнаружения рекламных элементов"""
-    def __init__(self, driver: WebDriver, config):
+    def __init__(self, driver: WebDriver, config: Settings):
         self.driver = driver
         self.config = config
         self.logger = logging.getLogger(__name__)
@@ -23,9 +24,9 @@ class AdDetector:
         all_ads = []
         
         detection_methods = [
+            ("ПОИСК ПО ЭЛЕМЕНТАМ", self._detect_by_elements),
             # self._detect_by_iframe,
             # self._detect_by_scripts,
-            ("поиск по элементам" , self._detect_by_elements),
             # self._detect_by_attributes,
             # self._detect_by_size
         ]
