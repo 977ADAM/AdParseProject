@@ -25,19 +25,18 @@ class AdDetector:
         detection_methods = [
             # self._detect_by_iframe,
             # self._detect_by_scripts,
-            self._detect_by_elements,
+            ("поиск по элементам" , self._detect_by_elements),
             # self._detect_by_attributes,
             # self._detect_by_size
         ]
         
-        for method in detection_methods:
+        for method_name, method in detection_methods:
             try:
                 ads = method()
                 all_ads.extend(ads)
-                self.logger.info(f"Метод {method.__name__} найденны {len(ads)} реклам")
+                self.logger.info(f"Метод {method_name} найденны {len(ads)} реклам")
             except Exception as e:
-                self.logger.error(f"Ошибка в {method.__name__}: {str(e)}")
-        
+                self.logger.error(f"Ошибка в {method_name}: {e}")
 
         unique_ads = self._remove_duplicates(all_ads)
         self.logger.info(f"Всего обнаружено уникальных объявлений: {len(unique_ads)}")
