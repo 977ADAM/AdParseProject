@@ -1,3 +1,4 @@
+import sys
 from config.settings import Settings
 from core.driver_manager import DriverManager
 from modules.parser.page_loader import PageLoader
@@ -20,9 +21,13 @@ def main():
     config = Settings()
     logger.info("Запуск приложения Ad Parser")
     
-    urls = [
-        "https://ria.ru/"
-    ]
+    if sys.argv[1]:
+        urls = []
+        urls.append(str(sys.argv[1]))
+    else:
+        urls = [
+            "https://m24.ru/"
+        ]
 
     driver_manager = DriverManager(config)
 

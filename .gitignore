@@ -3,3 +3,4 @@ __pycache__
 data
 reports
 allure-results
+.pytest_cache
