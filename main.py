@@ -21,13 +21,9 @@ def main():
     config = Settings()
     logger.info("Запуск приложения Ad Parser")
     
-    if sys.argv[1]:
-        urls = []
-        urls.append(str(sys.argv[1]))
-    else:
-        urls = [
-            "https://m24.ru/"
-        ]
+    urls = [
+        "https://ria.ru/"
+    ]
 
     driver_manager = DriverManager(config)
 
@@ -59,8 +55,8 @@ def main():
                 if not page_loader.load_page(url):
                     logger.error(f"Не удалось загрузить страницу.: {url}")
                     continue
-                logger.info(driver.title)
-                page_loader.scroll_page(scroll_steps=15)
+                
+                page_loader.scroll_page(scroll_steps = 15)
 
                 detected_ads = ad_detector.detect_ads()
                 logger.info(f"Обнаружено {len(detected_ads)} реклам на {url}")
@@ -101,36 +97,36 @@ def main():
 
                 logger.info(f"Завершена обработка для {url}")
         
-        if all_scan_data:
-            logger.info("Создание комплексных отчетов...")
-            report_generator = ReportGenerator(config)
+        # if all_scan_data:
+        #     logger.info("Создание комплексных отчетов...")
+        #     report_generator = ReportGenerator(config)
 
-            individual_reports = []
-            for scan_data in all_scan_data:
-                report_paths = report_generator.generate_comprehensive_report(scan_data)
-                individual_reports.append({
-                    'domain': scan_data.get('main_domain'),
-                    'report_paths': report_paths
-                })
-                logger.info(f"Generated reports for {scan_data.get('main_domain')}: {report_paths}")
+        #     individual_reports = []
+        #     for scan_data in all_scan_data:
+        #         report_paths = report_generator.generate_comprehensive_report(scan_data)
+        #         individual_reports.append({
+        #             'domain': scan_data.get('main_domain'),
+        #             'report_paths': report_paths
+        #         })
+        #         logger.info(f"Generated reports for {scan_data.get('main_domain')}: {report_paths}")
 
-            batch_report_paths = report_generator.generate_batch_report(all_scan_data)
+        #     batch_report_paths = report_generator.generate_batch_report(all_scan_data)
 
-            final_summary = {
-                'total_domains_processed': len(all_scan_data),
-                'total_ads_detected': sum(len(scan.get('detected_ads', [])) for scan in all_scan_data),
-                'total_interactions': sum(len(scan.get('interaction_results', [])) for scan in all_scan_data),
-                'individual_reports': individual_reports,
-                'batch_report': batch_report_paths,
-                'generated_at': time.time()
-            }
+        #     final_summary = {
+        #         'total_domains_processed': len(all_scan_data),
+        #         'total_ads_detected': sum(len(scan.get('detected_ads', [])) for scan in all_scan_data),
+        #         'total_interactions': sum(len(scan.get('interaction_results', [])) for scan in all_scan_data),
+        #         'individual_reports': individual_reports,
+        #         'batch_report': batch_report_paths,
+        #         'generated_at': time.time()
+        #     }
 
-            summary_path = config.OUTPUT_DIR / "final_summary.json"
-            with open(summary_path, 'w', encoding='utf-8') as f:
-                json.dump(final_summary, f, indent=2, ensure_ascii=False)
+        #     summary_path = config.OUTPUT_DIR / "final_summary.json"
+        #     with open(summary_path, 'w', encoding='utf-8') as f:
+        #         json.dump(final_summary, f, indent=2, ensure_ascii=False)
         
-        else:
-            logger.warning("Данные сканирования не собираются — создание отчета пропускается")
+        # else:
+        #     logger.warning("Данные сканирования не собираются — создание отчета пропускается")
 
     except Exception as e:
         logger.error(f"Ошибка приложения: {str(e)}")

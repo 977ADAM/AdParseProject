@@ -2,6 +2,7 @@ import logging
 import time
 from urllib.parse import urlparse, parse_qs
 from config.settings import Settings
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -163,8 +164,9 @@ class InteractionManager:
                 self.logger.info(f"Пробуем метод клика: {method_name}")
                 try:
                     click_result = method(element)
-                    # self.wait.until(EC.new_window_is_opened(original_window))
-                    self.wait.until(EC.number_of_windows_to_be(2))
+                    if len(self.driver.window_handles) == 1:
+                        continue
+
                     new_windows = [window for window in self.driver.window_handles if window != original_window][0]
                     self.driver.switch_to.window(new_windows)
                     
@@ -177,8 +179,7 @@ class InteractionManager:
                         break
                     else:
                         result['new_window_opened'] = False
-                        
-                    
+
                 except Exception as e:
                     self.logger.warning(f"Предупреждение о клике {e}")
                     result['error'] = str(e)

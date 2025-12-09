@@ -16,7 +16,7 @@ class Settings:
     BROWSER = "chrome"
     HEADLESS = False
     PAGE_LOAD_TIMEOUT = 15
-    IMPLICIT_WAIT = 3
+    IMPLICIT_WAIT = 5
     
     MEMORY_LIMIT_MB = 1000
     CLEANUP_INTERVAL = 50
