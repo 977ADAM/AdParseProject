@@ -7,6 +7,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
 
 class InteractionManager:
     """Главный класс для управления всем процессом взаимодействия с рекламой"""
@@ -14,7 +15,6 @@ class InteractionManager:
         self.driver = driver
         self.config = config
         self.logger = logging.getLogger(__name__)
-        self.wait = WebDriverWait(self.driver, config.PAGE_LOAD_TIMEOUT)
 
     def perform_complete_ad_interaction(self, ads):
         """Выполнение полного цикла взаимодействия с рекламным блоком"""
@@ -63,9 +63,6 @@ class InteractionManager:
             if results['click_analysis']['is_clickable']:
                 click_result = self._click_element(element)
                 results['interaction_result'] = click_result
-                self.logger.info(click_result.get("is_clickable"))
-                self.logger.info(click_result.get("success"))
-                
                 if click_result.get('success'):
                     results['redirect_analysis'] = self._analyze_redirect(
                         click_result.get('original_url'),
@@ -123,7 +120,9 @@ class InteractionManager:
             for key, value in query_params.items():
                 if key.startswith('utm_'):
                     utm_params[key] = value[0] if value else ''
-            
+
+            self.logger.info(utm_params)
+
             return {
                 'domain': parsed.netloc,
                 'path': parsed.path,
@@ -164,15 +163,18 @@ class InteractionManager:
                 self.logger.info(f"Пробуем метод клика: {method_name}")
                 try:
                     click_result = method(element)
-                    if len(self.driver.window_handles) == 1:
+                    windows = self.driver.window_handles
+                    if len(windows) == 1:
                         continue
-
-                    new_windows = [window for window in self.driver.window_handles if window != original_window][0]
-                    self.driver.switch_to.window(new_windows)
+                    elif len(windows) == 2:
+                        WebDriverWait(self.driver, 15, 1).until(EC.number_of_windows_to_be(2))
+                        self.driver.switch_to.window(windows[1])
+                        WebDriverWait(self.driver, 20, 3).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+                        time.sleep(10)
                     
                     if click_result['success']:
                         result['new_window_opened'] = True
-                        result['new_windows'] = list(new_windows) 
+                        result['new_windows'] = list(windows[1])
                         result['click_method'] = method_name
                         result['is_clickable'] = True
                         result['success'] = True
@@ -216,6 +218,7 @@ class InteractionManager:
         """Анализ редиректа после клика"""
         try:
             current_url = self.driver.current_url
+            self.logger.info(current_url)
             current_windows = set(self.driver.window_handles)
             
             analysis = {
