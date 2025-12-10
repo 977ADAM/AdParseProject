@@ -55,10 +55,10 @@ def main():
                 if not page_loader.load_page(url):
                     logger.error(f"Не удалось загрузить страницу.: {url}")
                     continue
-                
+
+                page_loader.add_cookies()
+
                 page_loader.scroll_page(scroll_steps = 15)
-                
-                page_loader.get_cookies()
 
                 detected_ads = ad_detector.detect_ads()
                 logger.info(f"Обнаружено {len(detected_ads)} реклам на {url}")
@@ -83,7 +83,7 @@ def main():
 
                 #     screenshot_capturer.capture_ads_screenshots(detected_ads)
 
-                interaction_results = interaction_manager.click_elements(detected_ads[:4])
+                interaction_results = interaction_manager.click_elements(detected_ads)
 
                 scan_data = {
                     'url': url,

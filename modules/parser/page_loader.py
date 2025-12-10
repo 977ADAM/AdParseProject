@@ -158,4 +158,17 @@ class PageLoader:
             pickle.dump(cookies, f)
     
     def add_cookies(self):
-        pass
+
+        filename = "cookies.pkl"
+
+        file_path = self.config.COOKIES_DIR / filename
+
+        with open(file_path, 'rb') as file:
+                cookies = pickle.load(file)
+        
+        self.driver.delete_all_cookies()
+
+        for cookie in cookies:
+            self.driver.add_cookie(cookie)
+
+        self.driver.refresh()

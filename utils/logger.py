@@ -11,7 +11,7 @@ def setup_logging():
     
     # Форматтер
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        '%(asctime)s - %(levelname)s - %(message)s'
     )
     
     # Хендлер для файла
