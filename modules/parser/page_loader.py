@@ -1,5 +1,6 @@
 import logging
 import time
+import pickle
 from urllib.parse import urlparse
 from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.common.by import By
@@ -144,3 +145,17 @@ class PageLoader:
         except Exception as e:
             self.logger.error(f"Error taking screenshot: {str(e)}")
             return None
+        
+    def get_cookies(self):
+
+        filename = "cookies.pkl"
+
+        file_path = self.config.COOKIES_DIR / filename
+
+        cookies = self.driver.get_cookies()
+
+        with open(file_path, 'wb') as f:
+            pickle.dump(cookies, f)
+    
+    def add_cookies(self):
+        pass

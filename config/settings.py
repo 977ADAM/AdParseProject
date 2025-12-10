@@ -7,14 +7,15 @@ class Settings:
     OUTPUT_DIR = BASE_DIR / "data" / "output"
     SCREENSHOT_DIR = OUTPUT_DIR / "screenshots"
     LOG_DIR = OUTPUT_DIR / "logs"
+    COOKIES_DIR = OUTPUT_DIR / "cookies"
     
-    for directory in [OUTPUT_DIR, SCREENSHOT_DIR, LOG_DIR]:
+    for directory in [OUTPUT_DIR, SCREENSHOT_DIR, LOG_DIR, COOKIES_DIR]:
         directory.mkdir(parents=True, exist_ok=True)
     
     WIDTH_WINDOW = 1920
     HEIGHT_WINDOW = 1080
     BROWSER = "chrome"
-    HEADLESS = True
+    HEADLESS = False
     PAGE_LOAD_TIMEOUT = 30
     IMPLICIT_WAIT = 5
     
