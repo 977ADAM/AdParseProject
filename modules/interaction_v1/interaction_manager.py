@@ -1,5 +1,6 @@
 import logging
 import time
+import json
 import random
 from urllib.parse import urlparse, parse_qs
 from config.settings import Settings
@@ -32,31 +33,18 @@ class InteractionManager:
 
                 click_result = self._click(element, i)
 
-                self.logger.info(click_result)
-
                 if not click_result['success']:
                     self.logger.warning(f"Не удалось кликнуть по элементу {i} переходим ко следующему элементу")
                     continue
                 
-                new_window = [window for window in self.driver.window_handles if window != main_window][0]
-
-                self.driver.switch_to.window(new_window)
-
-                self._wait_load_page()
-
-                current_url = self.driver.current_url
-
-                utm_data = self.extract_utm_params(current_url, i)
+                analyze_redirect_result = self._analyze_redirect(main_window)
 
                 ad_data = {
                     "ad_data": ad,
-                    "id": element.id,
-                    "current_url": current_url,
-                    "title": self.driver.title,
-                    "utm_params": utm_data
+                    "analyze_redirect": analyze_redirect_result,
+                    "click_analysis": click_result
                 }
-
-                self.close(main_window)
+                self.logger.info(json.dumps(ad_data, indent=2, ensure_ascii=False))
 
                 results.append(ad_data)
 
@@ -68,11 +56,11 @@ class InteractionManager:
                 continue
 
         return results
-    
-    def extract_utm_params(self, url, i):
+
+    def extract_utm_params(self, url):
         """Извлекает UTM-метки из URL"""
         try:
-            self.logger.info(f"Извлекает UTM-метки из URL элемента {i}")
+            self.logger.info(f"Извлекает UTM-метки из URL элемента")
             parsed_url = urlparse(url)
             query_params = parse_qs(parsed_url.query)
             utm_params = {}
@@ -87,7 +75,7 @@ class InteractionManager:
 
         except Exception as e:
             self.logger.error(f"Ошибка при извлечении UTM-метки: {e}")
-    
+
     def _wait_load_page(self):
         """Ожидания рагрузки рекламной страницы"""
         try:
@@ -141,5 +129,35 @@ class InteractionManager:
         return result
 
     def close(self, main_window):
-        self.driver.close()
-        self.driver.switch_to.window(main_window)
+        try:
+            self.driver.close()
+            self.driver.switch_to.window(main_window)
+        except Exception as e:
+            self.logger.warning(f"Ошибка восстановления исходного состояния: {e}")
+
+    def _analyze_redirect(self, main_window):
+        try:
+            new_window = [window for window in self.driver.window_handles if window != main_window][0]
+
+            self.driver.switch_to.window(new_window)
+
+            self._wait_load_page()
+
+            current_url = self.driver.current_url
+
+            utm_data = self.extract_utm_params(current_url)
+
+            self.close(main_window)
+            
+            return {
+                "utm_data": utm_data,
+                "current_url": current_url
+            }
+        except Exception as e:
+            pass
+
+    def perform_complete_ad_interaction(self, data):
+        for ad in data:
+            element = ad.get('element')
+            if not element:
+                continue

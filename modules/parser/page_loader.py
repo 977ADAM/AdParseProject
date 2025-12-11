@@ -1,10 +1,12 @@
 import logging
 import time
 import pickle
+import random
 from urllib.parse import urlparse
 from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from core.error_handler import ErrorHandler
@@ -172,3 +174,5 @@ class PageLoader:
             self.driver.add_cookie(cookie)
 
         self.driver.refresh()
+
+        ActionChains.pause(random.uniform(2.2, 2.8))
