@@ -1,3 +1,4 @@
+from redirect_manager import RedirectManager
 import logging
 import time
 import json
@@ -157,7 +158,15 @@ class InteractionManager:
             pass
 
     def perform_complete_ad_interaction(self, data):
+
         for ad in data:
             element = ad.get('element')
             if not element:
                 continue
+
+            with RedirectManager(self.driver, element) as redirect:
+                current_url = redirect.current_url
+                self.logger.info(current_url)
+
+                
+                
