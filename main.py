@@ -58,8 +58,6 @@ def main():
 
                 page_loader.scroll_page(scroll_steps = 15)
 
-                time.sleep(120)
-
                 # detected_ads = ad_detector.detect_ads()
                 # logger.info(f"Обнаружено {len(detected_ads)} реклам на {url}")
 
