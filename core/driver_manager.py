@@ -18,8 +18,7 @@ class DriverManager:
         try:
             if not self.memory_manager.check_memory():
                 self.logger.warning("Приближается лимит памяти, ожидание очистки...")
-
-            headless_mode = headless if headless is not None else self.config.HEADLESS
+            
             options = BrowserConfig.get_chrome_options(self.config)
             self.driver = webdriver.Chrome(options=options)
             

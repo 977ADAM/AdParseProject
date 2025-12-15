@@ -1,10 +1,10 @@
-from redirect_manager import RedirectManager
 import logging
 import time
 import json
 import random
 from urllib.parse import urlparse, parse_qs
 from config.settings import Settings
+from .redirect_manager import RedirectManager
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -12,7 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 
-class InteractionManager:
+class InteractionManagerV1:
     """Главный класс для управления всем процессом взаимодействия с рекламой"""
     def __init__(self, driver: WebDriver, config: Settings):
         self.driver = driver
@@ -160,6 +160,7 @@ class InteractionManager:
     def perform_complete_ad_interaction(self, data):
 
         for ad in data:
+
             element = ad.get('element')
             if not element:
                 continue

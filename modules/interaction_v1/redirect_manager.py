@@ -40,14 +40,16 @@ class RedirectManager:
         try:
             self._perform_action()
 
-            if not self._wait_for_new_window():
-                pass
-            
-            self._wait_load_page()
-            self.new_window_handle = self._get_new_window_handle()
+            self._wait_for_new_window()
+
+            self._get_new_window_handle()
 
             self.driver.switch_to.window(self.new_window_handle)
-            self.logger.info(f"Switched to new window: {self.new_window_handle}")
+
+            self.logger.info(f"Переключилось в новое окно: {self.new_window_handle}")
+
+            self._wait_for_page_load()
+            
             return self.driver
         
         except Exception as e:
@@ -59,12 +61,10 @@ class RedirectManager:
 
     def _get_new_window_handle(self) -> Optional[str]:
         """Получаем handle нового окна"""
-        current_handles = set(self.driver.window_handles)
-        new_handles = current_handles - self.original_handles
-        
-        if new_handles:
-            return next(iter(new_handles))
-        return None
+        for window_handle in self.driver.window_handles:
+            if window_handle != self.original_window:
+                self.new_window_handle = window_handle
+                break
     
     def _wait_for_new_window(self) -> bool:
         """Ожидание появления нового окна"""
@@ -76,19 +76,23 @@ class RedirectManager:
         except TimeoutException:
             return False
 
-
     def _perform_action(self) -> None:
         """Выполняем действие для открытия нового окна"""
         action_chain = ActionChains(self.driver)
+
         action_chain.pause(random.uniform(1.5, 2))
+
         if self.element:
             self._click(self.element, action_chain)
+
         action_chain.pause(random.uniform(1.5, 2))
 
     def _click(self, element: WebElement, action_chain: ActionChains) -> None:
         """Безопасный клик с обработкой различных случаев"""
         self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", element)
+
         action_chain.pause(random.uniform(1, 2))
+
         action_chain.move_to_element_with_offset(element, -20, -10).click().perform()
 
     def _wait_load_page(self):

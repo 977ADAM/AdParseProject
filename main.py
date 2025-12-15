@@ -7,7 +7,7 @@ from modules.screenshot.annotator import ScreenshotAnnotator
 from modules.screenshot.legend_builder import LegendBuilder
 from modules.reporting.report_generator import ReportGenerator
 
-from modules.interaction_v1.interaction_manager import InteractionManager
+from modules.interaction_v1.interaction_manager_v1 import InteractionManagerV1
 from utils.logger import setup_logging
 import logging
 import time
@@ -22,7 +22,7 @@ def main():
     logger.info("Запуск приложения Ad Parser")
     
     urls = [
-        "https://ria.ru/"
+        "https://sweb.ru/myip/"
     ]
 
     driver_manager = DriverManager(config)
@@ -42,15 +42,15 @@ def main():
 
                 page_loader = PageLoader(driver, config)
 
-                ad_detector = AdDetector(driver, config)
+                # ad_detector = AdDetector(driver, config)
 
-                screenshot_capturer = ScreenshotCapturer(driver, config)
+                # screenshot_capturer = ScreenshotCapturer(driver, config)
 
-                interaction_manager = InteractionManager(driver, config)
+                # interaction_manager = InteractionManagerV1(driver, config)
 
-                screenshot_annotator = ScreenshotAnnotator(config)
+                # screenshot_annotator = ScreenshotAnnotator(config)
  
-                legend_builder = LegendBuilder(config)
+                # legend_builder = LegendBuilder(config)
 
                 if not page_loader.load_page(url):
                     logger.error(f"Не удалось загрузить страницу.: {url}")
@@ -58,8 +58,10 @@ def main():
 
                 page_loader.scroll_page(scroll_steps = 15)
 
-                detected_ads = ad_detector.detect_ads()
-                logger.info(f"Обнаружено {len(detected_ads)} реклам на {url}")
+                time.sleep(120)
+
+                # detected_ads = ad_detector.detect_ads()
+                # logger.info(f"Обнаружено {len(detected_ads)} реклам на {url}")
 
                 # full_page_screenshot = screenshot_capturer.capture_full_page()
                 # annotated_screenshot = None
@@ -81,19 +83,19 @@ def main():
 
                 #     screenshot_capturer.capture_ads_screenshots(detected_ads)
 
-                interaction_results = interaction_manager.click_elements(detected_ads[:3])
+                # interaction_results = interaction_manager.perform_complete_ad_interaction(detected_ads[:2])
 
-                scan_data = {
-                    'url': url,
-                    'main_domain': url.split('//')[-1].split('/')[0],
-                    'scan_timestamp': time.time(),
-                    'scan_duration': time.time() - scan_start_time,
-                    'detected_ads': detected_ads,
-                    'interaction_results': interaction_results,
-                    'processed_urls': [url]
-                }
+                # scan_data = {
+                #     'url': url,
+                #     'main_domain': url.split('//')[-1].split('/')[0],
+                #     'scan_timestamp': time.time(),
+                #     'scan_duration': time.time() - scan_start_time,
+                #     'detected_ads': detected_ads,
+                #     'interaction_results': interaction_results,
+                #     'processed_urls': [url]
+                # }
 
-                all_scan_data.append(scan_data)
+                # all_scan_data.append(scan_data)
 
                 logger.info(f"Завершена обработка для {url}")
         

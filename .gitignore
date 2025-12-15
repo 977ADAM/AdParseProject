@@ -4,3 +4,4 @@ data
 reports
 allure-results
 .pytest_cache
+.env

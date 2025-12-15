@@ -1,7 +1,7 @@
-from .interaction_manager import InteractionManager
+from .interaction_manager_v1 import InteractionManagerV1
 from .redirect_manager import RedirectManager
 
 __all__ = [
-    'InteractionManager',
+    'InteractionManagerV1',
     'RedirectManager'
 ]
