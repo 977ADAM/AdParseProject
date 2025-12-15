@@ -1,12 +1,10 @@
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.remote.webdriver import WebDriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains 
-from typing import Optional, Tuple, Callable, Generator, Any, Union
+from typing import Optional
 import logging
 import time
 import random
@@ -58,7 +56,6 @@ class RedirectManager:
                 self.driver.switch_to.window(self.original_window)
             raise
 
-
     def _get_new_window_handle(self) -> Optional[str]:
         """Получаем handle нового окна"""
         for window_handle in self.driver.window_handles:
@@ -95,18 +92,6 @@ class RedirectManager:
 
         action_chain.move_to_element_with_offset(element, -20, -10).click().perform()
 
-    def _wait_load_page(self):
-        """Ожидания рагрузки рекламной страницы"""
-        try:
-            self.action_chain.pause(random.uniform(2.3, 3.7))
-
-            self.wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-
-            self.action_chain.pause(random.uniform(2.3, 3.7))
-
-        except Exception as e:
-            self.logger.error(f"Ошибка ожидания рагрузки рекламной страницы: {e}")
-
     def _wait_for_page_load(self, timeout: Optional[int] = None):
         """Ожидание полной загрузки страницы"""
         timeout = timeout or self.timeout
@@ -117,7 +102,6 @@ class RedirectManager:
             time.sleep(random.uniform(0.5, 1.5))  # Дополнительная пауза
         except TimeoutException:
             self.logger.warning("Страница загрузилась не полностью")
-
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Возвращаемся в исходное окно (и закрываем новое при необходимости)"""

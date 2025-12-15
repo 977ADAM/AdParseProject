@@ -159,6 +159,8 @@ class InteractionManagerV1:
 
     def perform_complete_ad_interaction(self, data):
 
+        results = []
+
         for ad in data:
 
             element = ad.get('element')
@@ -167,7 +169,14 @@ class InteractionManagerV1:
 
             with RedirectManager(self.driver, element) as redirect:
                 current_url = redirect.current_url
-                self.logger.info(current_url)
 
-                
-                
+            utm_data = self.extract_utm_params(current_url)
+
+            ad_data = {
+                "ad_data": ad,
+                "utm_data": utm_data,
+            }
+
+            results.append(ad_data)
+
+        return results
