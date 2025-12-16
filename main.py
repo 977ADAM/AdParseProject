@@ -22,7 +22,7 @@ def main():
     logger.info("Запуск приложения Ad Parser")
     
     urls = [
-        "https://sweb.ru/myip/"
+        "https://ria.ru/"
     ]
 
     driver_manager = DriverManager(config)
@@ -42,11 +42,11 @@ def main():
 
                 page_loader = PageLoader(driver, config)
 
-                # ad_detector = AdDetector(driver, config)
+                ad_detector = AdDetector(driver, config)
 
                 # screenshot_capturer = ScreenshotCapturer(driver, config)
 
-                # interaction_manager = InteractionManagerV1(driver, config)
+                interaction_manager = InteractionManagerV1(driver, config)
 
                 # screenshot_annotator = ScreenshotAnnotator(config)
  
@@ -58,8 +58,8 @@ def main():
 
                 page_loader.scroll_page(scroll_steps = 15)
 
-                # detected_ads = ad_detector.detect_ads()
-                # logger.info(f"Обнаружено {len(detected_ads)} реклам на {url}")
+                detected_ads = ad_detector.detect_ads()
+                logger.info(f"Обнаружено {len(detected_ads)} реклам на {url}")
 
                 # full_page_screenshot = screenshot_capturer.capture_full_page()
                 # annotated_screenshot = None
@@ -81,7 +81,7 @@ def main():
 
                 #     screenshot_capturer.capture_ads_screenshots(detected_ads)
 
-                # interaction_results = interaction_manager.perform_complete_ad_interaction(detected_ads[:2])
+                interaction_results = interaction_manager.perform_complete_ad_interaction(detected_ads)
 
                 # scan_data = {
                 #     'url': url,

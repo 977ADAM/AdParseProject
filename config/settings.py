@@ -15,7 +15,7 @@ class Settings:
     WIDTH_WINDOW = 1920
     HEIGHT_WINDOW = 1080
     BROWSER = "chrome"
-    HEADLESS = True
+    HEADLESS = False
     PAGE_LOAD_TIMEOUT = 30
     IMPLICIT_WAIT = 5
     

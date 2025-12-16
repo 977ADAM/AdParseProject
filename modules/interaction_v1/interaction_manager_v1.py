@@ -158,7 +158,10 @@ class InteractionManagerV1:
             pass
 
     def perform_complete_ad_interaction(self, data):
-
+        """Выполнение полного цикла взаимодействия с рекламным блоком"""
+        self.logger.info("Начинаем клики по рекламным элементам")
+        original_window = self.driver.current_window_handle
+        self.logger.info(f"Исходное окно: {original_window}")
         results = []
 
         for ad in data:
@@ -166,11 +169,17 @@ class InteractionManagerV1:
             element = ad.get('element')
             if not element:
                 continue
+            
+            redirect_manager = RedirectManager(self.driver, element, original_window)
 
-            with RedirectManager(self.driver, element) as redirect:
+            with redirect_manager as redirect:
                 current_url = redirect.current_url
 
+            self.logger.info(current_url)
+
             utm_data = self.extract_utm_params(current_url)
+
+            self.logger.info(utm_data)
 
             ad_data = {
                 "ad_data": ad,

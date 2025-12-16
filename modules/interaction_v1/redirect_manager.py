@@ -2,6 +2,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import (TimeoutException,
                                         StaleElementReferenceException,
@@ -14,19 +15,18 @@ import random
 class RedirectManager:
     """Контекстный менеджер для безопасного управления переходами между окнами/вкладками в Selenium."""
 
-    def __init__(self, driver: WebDriver, element: WebElement, timeout: int = 30):
+    def __init__(self, driver: WebDriver, element: WebElement, original_window: str, timeout: int = 30):
         if not element:
             raise ValueError("Должен быть указан element")
         
         self.driver = driver
         self.element = element
         self.timeout = timeout
+        self.original_window = original_window
 
-        self.original_window = None
         self.original_handles = None
         self.new_window_handle = None
 
-        self.wait = WebDriverWait(self.driver, self.timeout)
         self.logger = logging.getLogger(__name__)
         
     def __enter__(self) -> WebDriver:
@@ -71,11 +71,8 @@ class RedirectManager:
         
     def _save_original_state(self):
         """Сохранение исходного состояния"""
-        self.original_window = self.driver.current_window_handle
         self.original_handles = self.driver.window_handles
-
-        self.logger.info(f"Исходное окно: {self.original_window}")
-        self.logger.info(f"Оригинальные ручки: {self.original_handles}")
+        self.logger.info(f"Оригинальные : окна{self.original_handles}")
 
     def _get_new_window_handle(self) -> Optional[str]:
         """Получаем handle нового окна"""
@@ -87,7 +84,7 @@ class RedirectManager:
     def _wait_for_new_window(self) -> bool:
         """Ожидание появления нового окна"""
         try:
-            self.wait.until(
+            WebDriverWait(self.driver, self.timeout).until(
                 lambda d: len(d.window_handles) > len(self.original_handles)
             )
             return True
@@ -109,19 +106,25 @@ class RedirectManager:
         """Безопасный клик с обработкой различных случаев"""
         self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", element)
         
-        self.wait.until(EC.element_to_be_clickable(element))
+        WebDriverWait(self.driver, self.timeout).until(EC.element_to_be_clickable(element))
 
         action_chain.pause(random.uniform(1, 2))
 
         action_chain.move_to_element_with_offset(element, -20, -10).click().perform()
 
-    def _wait_for_page_load(self, timeout: Optional[int] = None):
+        self.logger.info(f"Клик по рекламе: {element.id}")
+
+    def _wait_for_page_load(self, timeout: int = None):
         """Ожидание полной загрузки страницы"""
         timeout = timeout or self.timeout
         try:
-            self.wait.until(
+            WebDriverWait(self.driver, self.timeout).until(
+                EC.visibility_of_element_located((By.TAG_NAME, "body"))
+                )
+            
+            WebDriverWait(self.driver, self.timeout).until(
                 lambda d: d.execute_script("return document.readyState") == "complete"
-            )
+                )
         except TimeoutException:
             self.logger.warning("Страница загрузилась не полностью")
 
