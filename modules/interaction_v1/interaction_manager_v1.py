@@ -165,27 +165,28 @@ class InteractionManagerV1:
         results = []
 
         for ad in data:
+            try:
+                element = ad.get('element')
+                if not element:
+                    continue
+                
+                redirect_manager = RedirectManager(self.driver, element, original_window)
 
-            element = ad.get('element')
-            if not element:
-                continue
-            
-            redirect_manager = RedirectManager(self.driver, element, original_window)
+                with redirect_manager as redirect:
+                    current_url = redirect.current_url
 
-            with redirect_manager as redirect:
-                current_url = redirect.current_url
+                self.logger.info(current_url)
 
-            self.logger.info(current_url)
+                utm_data = self.extract_utm_params(current_url)
 
-            utm_data = self.extract_utm_params(current_url)
+                self.logger.info(utm_data)
 
-            self.logger.info(utm_data)
+                ad_data = {
+                    "ad_data": ad,
+                    "utm_data": utm_data,
+                }
 
-            ad_data = {
-                "ad_data": ad,
-                "utm_data": utm_data,
-            }
-
-            results.append(ad_data)
-
+                results.append(ad_data)
+            except Exception as e:
+                self.logger.error(f"Ошибка: {e}")
         return results

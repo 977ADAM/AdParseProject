@@ -35,7 +35,8 @@ class RedirectManager:
             self._validate_driver_state()
             self._save_original_state()
             self._perform_action()
-            self._wait_for_new_window()
+            if not self._wait_for_new_window():
+                raise TimeoutException("Новое окно не появилось")
             self._get_new_window_handle()
             self.driver.switch_to.window(self.new_window_handle)
             self.logger.info(f"Переключилось в новое окно: {self.new_window_handle}")
@@ -71,15 +72,16 @@ class RedirectManager:
         
     def _save_original_state(self):
         """Сохранение исходного состояния"""
-        self.original_handles = self.driver.window_handles
+        self.original_handles = list(self.driver.window_handles)
         self.logger.info(f"Оригинальные : окна{self.original_handles}")
 
     def _get_new_window_handle(self) -> Optional[str]:
         """Получаем handle нового окна"""
-        for window_handle in self.driver.window_handles:
-            if window_handle != self.original_window:
-                self.new_window_handle = window_handle
-                break
+        new_handles = set(self.driver.window_handles) - set(self.original_handles)
+        if not new_handles:
+            raise TimeoutException("Не удалось определить новое окно")
+        self.new_window_handle = new_handles.pop()
+
     
     def _wait_for_new_window(self) -> bool:
         """Ожидание появления нового окна"""
@@ -102,11 +104,15 @@ class RedirectManager:
 
         action_chain.pause(random.uniform(1.5, 2))
 
+        action_chain.perform()
+
     def _click(self, element: WebElement, action_chain: ActionChains) -> None:
         """Безопасный клик с обработкой различных случаев"""
         self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", element)
         
-        WebDriverWait(self.driver, self.timeout).until(EC.element_to_be_clickable(element))
+        WebDriverWait(self.driver, self.timeout).until(
+            lambda d: element.is_displayed() and element.is_enabled()
+        )
 
         action_chain.pause(random.uniform(1, 2))
 
@@ -118,10 +124,6 @@ class RedirectManager:
         """Ожидание полной загрузки страницы"""
         timeout = timeout or self.timeout
         try:
-            WebDriverWait(self.driver, self.timeout).until(
-                EC.visibility_of_element_located((By.TAG_NAME, "body"))
-                )
-            
             WebDriverWait(self.driver, self.timeout).until(
                 lambda d: d.execute_script("return document.readyState") == "complete"
                 )
