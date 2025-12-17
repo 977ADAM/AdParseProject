@@ -56,7 +56,7 @@ class AdPatterns:
     # HTML классы и атрибуты рекламы
     AD_CLASS_PATTERNS = [
         'yandex_rtb_',
-        'adfox_'
+        'adfox_',
         # 'ad',
         # 'ads',
         # 'advertisement',
@@ -109,7 +109,8 @@ class AdPatterns:
     # ID паттерны рекламы
     AD_ID_PATTERNS = [
         'yandex_rtb_',
-        'adfox_'
+        'adfox_',
+        'begun_block_',
         # 'banner_before_header_index',
         # 'ad',
         # 'ads',

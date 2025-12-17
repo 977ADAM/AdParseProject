@@ -183,7 +183,10 @@ class InteractionManagerV1:
 
                 ad_data = {
                     "ad_data": ad,
-                    "utm_data": utm_data,
+                    "interaction": {
+                        "utm_data": utm_data,
+                        "current_url": current_url
+                    },
                 }
 
                 results.append(ad_data)

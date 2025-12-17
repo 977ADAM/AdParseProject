@@ -155,8 +155,8 @@ class ReportGenerator:
             processed_interaction = {
                 'ad_id': ad_data.get('id', 'N/A'),
                 'ad_network': ad_data.get('network', 'unknown'),
-                'ad_page_link': interactions.get('redirect_analysis').get('current_url'),
-                'url_analysis': interactions.get('redirect_analysis').get('url_analysis')
+                'ad_page_link': interactions.get('utm_data'),
+                'url_analysis': interactions.get('current_url')
             }
             
             processed_interactions.append(processed_interaction)
