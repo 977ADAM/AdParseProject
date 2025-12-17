@@ -22,7 +22,15 @@ def main():
     logger.info("Запуск приложения Ad Parser")
     
     urls = [
-        "https://ria.ru/"
+        "https://ria.ru/",
+        "https://1prime.ru/",
+        "https://monocle.ru/",
+        "https://rg.ru/",
+        "https://oilcapital.ru/",
+        "https://secretmag.ru/",
+        "https://www.rbc.ru/",
+        "https://tass.ru/",
+        "https://www.m24.ru/"
     ]
 
     driver_manager = DriverManager(config)
